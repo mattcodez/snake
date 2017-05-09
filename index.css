@@ -1,0 +1,8 @@
+BODY{
+  font-size: 12px;
+}
+
+div#playSpace {
+  font-family: monospace;
+  font-size: 1.5rem;
+}
