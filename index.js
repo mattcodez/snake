@@ -21,7 +21,8 @@ class game {
     const snakeStart      = Math.floor(this.gridSize / 2);
     this.snake.pieces     = [
       [snakeStart, snakeStart, 0],
-      [snakeStart, snakeStart - 1, 0]
+      [snakeStart, snakeStart - 1, 0],
+      [snakeStart, snakeStart - 2, 0]
     ];
     //this.snake.len        = 2;
     //this.snake.dir        = 1; //0: up, 1: right, 2: down, 3: left
@@ -44,13 +45,28 @@ class game {
     }.bind(this));
 
     //controls
-    //TODO
+    //left
+    this.mainHTMLDoc.onkeydown = e => {
+      switch(e.keyCode){
+        case 37: //left
+          this.setNewDir(3);
+        break;
+        case 38: //up
+          this.setNewDir(0);
+        break;
+        case 39: //right
+          this.setNewDir(1);
+        break;
+        case 40: //down
+          this.setNewDir(2);
+        break;
+      }
+    };
   }
 
-  // buildInitialPlayData(){
-  //   const grid = []
-  //   this.state.grid = grid;
-  // }
+  setNewDir(newDir){
+    this.snake.pieces[0][2] = newDir;
+  }
 
   updateState(){
     //TODO: add food
@@ -59,10 +75,11 @@ class game {
     if ((now - this.snake.lastMove) >= this.snakeSpeed){
       this.snake.lastMove = now;
       const newPieceSet = []; //let's keep things immutable
-      let prevPiece = null;
+      let prevDir;
       this.snake.pieces.forEach(piece => {
         const [x, y, dir] = piece;
-        const [,,newDir] = prevPiece || [0,0,dir];
+        const newDir = prevDir || dir;
+        prevDir = dir;
         switch(dir){
           case 0: //up
             newPieceSet.unshift([x, y + 1, newDir]);
@@ -77,7 +94,6 @@ class game {
             newPieceSet.unshift([x - 1, y, newDir]);
           break;
         }
-        prevPiece = piece;
       });
       this.snake.pieces = newPieceSet;
     }
