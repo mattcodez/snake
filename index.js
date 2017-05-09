@@ -19,10 +19,13 @@ class game {
     //TODO: consider separate class
     this.snake            = {};
     const snakeStart      = Math.floor(this.gridSize / 2);
-    this.snake.pos        = [snakeStart, snakeStart];
-    this.snake.len        = 2;
-    this.snake.dir        = 1; //0: up, 1: right, 2: down, 3: left
-    this.snake.lastMove   = 0;
+    this.snake.pieces     = [
+      [snakeStart, snakeStart, 0],
+      [snakeStart, snakeStart - 1, 0]
+    ];
+    //this.snake.len        = 2;
+    //this.snake.dir        = 1; //0: up, 1: right, 2: down, 3: left
+    this.snake.lastMove   = 0; //unix time of last movement
 
     this.mainWindow       = window;
     this.mainHTMLDoc      = document;
@@ -51,24 +54,31 @@ class game {
 
   updateState(){
     //TODO: add food
-    const [x, y] = this.snake.pos;
+    //const [x, y] = this.snake.pos;
     const now = Date.now();
     if ((now - this.snake.lastMove) >= this.snakeSpeed){
       this.snake.lastMove = now;
-      switch(this.snake.dir){
-        case 0: //up
-          this.snake.pos = [x, y + 1];
-        break;
-        case 1: //right
-          this.snake.pos = [x + 1, y];
-        break;
-        case 2: //down
-          this.snake.pos = [x, y - 1];
-        break;
-        case 3: //left
-          this.snake.pos = [x - 1, y];
-        break;
-      }
+      const newPieceSet = []; //let's keep things immutable
+      let prevPiece = null;
+      this.snake.pieces.forEach(piece => {
+        const [x, y, dir] = piece;
+        const [,,newDir] = prevPiece || [0,0,dir];
+        switch(this.snake.dir){
+          case 0: //up
+            newPieceSet.unshift([x, y + 1, newDir]);
+          break;
+          case 1: //right
+            newPieceSet.unshift([x + 1, y, newDir]);
+          break;
+          case 2: //down
+            newPieceSet.unshift([x, y - 1, newDir]);
+          break;
+          case 3: //left
+            newPieceSet.unshift([x - 1, y, newDir]);
+          break;
+        }
+        prevPiece = piece;
+      })
     }
   }
 
@@ -90,11 +100,26 @@ class game {
             }
             else rowText += '.';
           break;
+
           case 1: //right
+            if (col === x && row === y){
+              rowText += '&#x2588;';
+            }
+            else rowText += '.';
           break;
+
           case 2: //down
+            if (col === x && (row <= y && row >= (y - len))){
+              rowText += '&#x2588;';
+            }
+            else rowText += '.';
           break;
+
           case 3: //left
+            if (col === x && (row <= y && row >= (y - len))){
+              rowText += '&#x2588;';
+            }
+            else rowText += '.';
           break;
         }
       }
