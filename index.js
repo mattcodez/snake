@@ -10,10 +10,10 @@ class game {
   //TODO: remember constants need to be in separate file, does that make sense here?
 
   constructor(window, document, playSpaceEl){
-    this.stateUpdateSpeed = 10;  //ms between game state changes
-    this.snakeSpeed       = 4;   //How many state updates between snake movement /*TODO: move to snake stats*/
+    this.stateUpdateSpeed = 100; //ms between game state changes
+    this.snakeSpeed       = 300; //ms between snake movement /*TODO: move to snake stats*/
     this.state            = {};  //Holds game state for updates and rendering
-    this.gridSize         = 100;
+    this.gridSize         = 50;
 
     //snake stats
     //TODO: consider separate class
@@ -21,7 +21,8 @@ class game {
     const snakeStart      = Math.floor(this.gridSize / 2);
     this.snake.pos        = [snakeStart, snakeStart];
     this.snake.len        = 2;
-    this.snake.dir        = 0; //0: up, 1: right, 2: down, 3: left
+    this.snake.dir        = 1; //0: up, 1: right, 2: down, 3: left
+    this.snake.lastMove   = 0;
 
     this.mainWindow       = window;
     this.mainHTMLDoc      = document;
@@ -51,25 +52,43 @@ class game {
   updateState(){
     //TODO: add food
     const [x, y] = this.snake.pos;
-    //this.snake.pos = [x, y + 1];
+    const now = Date.now();
+    if ((now - this.snake.lastMove) >= this.snakeSpeed){
+      this.snake.lastMove = now;
+      switch(this.snake.dir){
+        case 0: //up
+          this.snake.pos = [x, y + 1];
+        break;
+        case 1: //right
+          this.snake.pos = [x + 1, y];
+        break;
+        case 2: //down
+          this.snake.pos = [x, y - 1];
+        break;
+        case 3: //left
+          this.snake.pos = [x - 1, y];
+        break;
+      }
+    }
   }
 
   render(){
     const {len, pos} = this.snake;
     const [x, y] = pos;
-    function append(text){
-      this.playSpaceEl.innerHTML += text;
-    }
+    const append = text => this.playSpaceEl.innerHTML += text;
+    //Prepend to account for reverse Y axis
+    const prepend = text => this.playSpaceEl.innerHTML = text + this.playSpaceEl.innerHTML;
 
     this.playSpaceEl.innerHTML = '';
     for (let row = 0; row < this.gridSize; row++){
+      let rowText = '';
       for (let col = 0; col < this.gridSize; col++){
         switch(this.snake.dir){
           case 0: //up
             if (col === x && (row <= y && row >= (y - len))){
-              append('S');
+              rowText += '&#x2588;';
             }
-            else append('0');
+            else rowText += '.';
           break;
           case 1: //right
           break;
@@ -79,7 +98,8 @@ class game {
           break;
         }
       }
-      this.playSpaceEl.innerHTML += '<br/>'; //end of grid row
+      rowText += '<br/>'; //end of grid row
+      prepend(rowText);
     }
   }
 }
