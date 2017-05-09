@@ -63,7 +63,7 @@ class game {
       this.snake.pieces.forEach(piece => {
         const [x, y, dir] = piece;
         const [,,newDir] = prevPiece || [0,0,dir];
-        switch(this.snake.dir){
+        switch(dir){
           case 0: //up
             newPieceSet.unshift([x, y + 1, newDir]);
           break;
@@ -78,53 +78,31 @@ class game {
           break;
         }
         prevPiece = piece;
-      })
+      });
+      this.snake.pieces = newPieceSet;
     }
   }
 
   render(){
-    const {len, pos} = this.snake;
-    const [x, y] = pos;
     const append = text => this.playSpaceEl.innerHTML += text;
     //Prepend to account for reverse Y axis
     const prepend = text => this.playSpaceEl.innerHTML = text + this.playSpaceEl.innerHTML;
 
-    this.playSpaceEl.innerHTML = '';
-    for (let row = 0; row < this.gridSize; row++){
-      let rowText = '';
-      for (let col = 0; col < this.gridSize; col++){
-        switch(this.snake.dir){
-          case 0: //up
-            if (col === x && (row <= y && row >= (y - len))){
-              rowText += '&#x2588;';
-            }
-            else rowText += '.';
-          break;
-
-          case 1: //right
-            if (col === x && row === y){
-              rowText += '&#x2588;';
-            }
-            else rowText += '.';
-          break;
-
-          case 2: //down
-            if (col === x && (row <= y && row >= (y - len))){
-              rowText += '&#x2588;';
-            }
-            else rowText += '.';
-          break;
-
-          case 3: //left
-            if (col === x && (row <= y && row >= (y - len))){
-              rowText += '&#x2588;';
-            }
-            else rowText += '.';
-          break;
-        }
-      }
-      rowText += '<br/>'; //end of grid row
-      prepend(rowText);
+    //Blank fill
+    const grid = [];
+    for (let i = 0; i < this.gridSize; i++){
+      grid.push(Array(this.gridSize).fill('.'));
     }
+
+    //Set snake pieces in grid
+    this.snake.pieces.forEach(piece => {
+      const [x, y] = piece;
+      grid[y][x] = '&#x2588;';
+    });
+
+    //do this all separate, otherwise we'd have to check every piece for
+    //every cell
+    this.playSpaceEl.innerHTML = '';
+    grid.forEach(row => prepend(row.join('') + '<br/>'));
   }
 }
