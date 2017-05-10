@@ -56,6 +56,8 @@ class game {
   }
 
   setNewDir(newDir){
+    //We only need to set the direction of the top piece when
+    //a control key is pressed
     this.snake.pieces[0][2] = newDir;
   }
 
