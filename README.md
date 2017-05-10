@@ -1,7 +1,10 @@
 # SNAKE
 by Matt Molnar
 
-### What's left
+## Running
+Just host the directory with your favorite HTTP provider
+
+## What's left
 * Finish debugging 'up' direction issue
 * Add food
 * Add wall collision detection
