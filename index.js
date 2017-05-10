@@ -4,16 +4,11 @@ function init(/*TODO: place args here*/){
 }
 
 class game {
-  //buildInitialPlayData
-  //run render on requestanimationframe
-  //update game state every 10ms
-  //TODO: remember constants need to be in separate file, does that make sense here?
-
   constructor(window, document, playSpaceEl){
     this.stateUpdateSpeed = 100; //ms between game state changes
     this.snakeSpeed       = 300; //ms between snake movement /*TODO: move to snake stats*/
     this.state            = {};  //Holds game state for updates and rendering
-    this.gridSize         = 50;
+    this.gridSize         = 50;  //Size of characters in grid
 
     //snake stats
     //TODO: consider separate class
@@ -24,8 +19,6 @@ class game {
       [snakeStart, snakeStart - 1, 0],
       [snakeStart, snakeStart - 2, 0]
     ];
-    //this.snake.len        = 2;
-    //this.snake.dir        = 1; //0: up, 1: right, 2: down, 3: left
     this.snake.lastMove   = 0; //unix time of last movement
 
     this.mainWindow       = window;
@@ -33,7 +26,6 @@ class game {
     this.playSpaceEl      = playSpaceEl;
 
     this.assignEventHandlers();
-    //this.buildInitialPlayData();
   }
 
   assignEventHandlers(){
@@ -45,20 +37,19 @@ class game {
     }.bind(this));
 
     //controls
-    //left
     this.mainHTMLDoc.onkeydown = e => {
       switch(e.keyCode){
         case 37: //left
-          this.setNewDir(3);
+          this.setNewDir(3); //console.log('left')
         break;
         case 38: //up
-          this.setNewDir(0);
+          this.setNewDir(0); //console.log('up')
         break;
         case 39: //right
-          this.setNewDir(1);
+          this.setNewDir(1); //console.log('right')
         break;
         case 40: //down
-          this.setNewDir(2);
+          this.setNewDir(2); //console.log('down')
         break;
       }
     };
@@ -70,37 +61,37 @@ class game {
 
   updateState(){
     //TODO: add food
-    //const [x, y] = this.snake.pos;
     const now = Date.now();
     if ((now - this.snake.lastMove) >= this.snakeSpeed){
       this.snake.lastMove = now;
       const newPieceSet = []; //let's keep things immutable
-      let prevDir;
-      this.snake.pieces.forEach(piece => {
+      let nextDir;
+      this.snake.pieces.forEach((piece,i) => {
         const [x, y, dir] = piece;
-        const newDir = prevDir || dir;
-        prevDir = dir;
+        //The piece will move next time in the direction of the previous piece
+        nextDir = nextDir || dir;
+        //console.log(`piece:${i},dir:${dir},nextDir:${nextDir}`);
         switch(dir){
           case 0: //up
-            newPieceSet.unshift([x, y + 1, newDir]);
+            newPieceSet.push([x, y + 1, nextDir]);
           break;
           case 1: //right
-            newPieceSet.unshift([x + 1, y, newDir]);
+            newPieceSet.push([x + 1, y, nextDir]);
           break;
           case 2: //down
-            newPieceSet.unshift([x, y - 1, newDir]);
+            newPieceSet.push([x, y - 1, nextDir]);
           break;
           case 3: //left
-            newPieceSet.unshift([x - 1, y, newDir]);
+            newPieceSet.push([x - 1, y, nextDir]);
           break;
         }
+        nextDir = dir;
       });
       this.snake.pieces = newPieceSet;
     }
   }
 
   render(){
-    const append = text => this.playSpaceEl.innerHTML += text;
     //Prepend to account for reverse Y axis
     const prepend = text => this.playSpaceEl.innerHTML = text + this.playSpaceEl.innerHTML;
 
